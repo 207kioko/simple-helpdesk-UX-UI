@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuickFix IT Desk</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .shake { animation: shake 0.5s; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Floating Button -->
+  <button id="popupToggle" class="fixed bottom-6 right-6 z-50 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg transition">
+    <i class="fas fa-tools text-xl"></i>
+  </button>
+
+  <!-- Popup Modal -->
+  <div id="popupModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40 hidden">
+    <div class="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden transition-all duration-300 fade-in relative">
+      
+      <!-- Close Button -->
+      <button id="closePopup" class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-xl">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- Header -->
+      <div class="bg-green-600 p-6 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold">Bel QuickFix IT Desk</h1>
+            <p class="text-green-100 mt-1">Submit your IT issues quickly</p>
+          </div>
+          <div class="bg-green-500 p-3 rounded-full">
+            <i class="fas fa-tools text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="issueForm" class="p-6 space-y-4">
+        <div>
+          <label for="name" class="block text-sm font-medium text-green-700 mb-1">
+            <i class="fas fa-user mr-2 text-green-500"></i> Your Name
+          </label>
+          <input type="text" id="name" name="name" required
+            class="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+            placeholder=" ">
+        </div>
+
+        <div>
+          <label for="department" class="block text-sm font-medium text-green-700 mb-1">
+            <i class="fas fa-building mr-2 text-green-500"></i> Department (Optional)
+          </label>
+          <select id="department" name="department"
+            class="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition appearance-none bg-white">
+            <option value="">Select Department</option>
+            <option value="Finance">Finance</option>
+            <option value="HR">Human Resources</option>
+            <option value="IT">Information Technology</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Operations">Operations</option>
+            <option value="Sales">Sales</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="issue" class="block text-sm font-medium text-green-700 mb-1">
+            <i class="fas fa-exclamation-triangle mr-2 text-green-500"></i> Issue Description
+          </label>
+          <textarea id="issue" name="issue" rows="4" required
+            class="w-full px-4 py-2 border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
+            placeholder="Describe your problem in detail..."></textarea>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition flex items-center justify-center">
+            <i class="fas fa-paper-plane mr-2"></i> Submit Issue
+          </button>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div id="successMessage" class="hidden p-6 fade-in">
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div class="flex items-center">
+            <div class="bg-green-100 p-2 rounded-full mr-3">
+              <i class="fas fa-check-circle text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <h3 class="font-medium text-green-800">Issue submitted successfully!</h3>
+              <p class="text-green-600 text-sm mt-1">We’ve received your issue report. Our team will follow up shortly.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center p-4 text-green-500 text-sm">
+        <p>IT Helpdesk • <a href="mailto:helpdesk@burhaniengineers.com" class="text-green-600 hover:underline">helpdesk@burhaniengineers.com</a></p>
+        <p class="mt-1">Thank You</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    emailjs.init("ur6mk98bkS_hpPno2"); // Replace with your EmailJS public key
+
+    document.getElementById("issueForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const form = this;
+
+      emailjs.sendForm("service_fzh9exp", "template_26stxtp", form)
+        .then(() => {
+          form.classList.add("hidden");
+          document.getElementById("successMessage").classList.remove("hidden");
+          form.reset();
+        })
+        .catch((error) => {
+          alert("Failed to send issue. Please try again later.");
+          console.error("EmailJS error:", error);
+        });
+    });
+
+    // Toggle popup
+    const popupToggle = document.getElementById("popupToggle");
+    const popupModal = document.getElementById("popupModal");
+    const closePopup = document.getElementById("closePopup");
+
+    popupToggle.addEventListener("click", () => {
+      popupModal.classList.remove("hidden");
+    });
+
+    closePopup.addEventListener("click", () => {
+      popupModal.classList.add("hidden");
+      document.getElementById("issueForm").classList.remove("hidden");
+      document.getElementById("successMessage").classList.add("hidden");
+    });
+  </script>
+
+</body>
+</html>
