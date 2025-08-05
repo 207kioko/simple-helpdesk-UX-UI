@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Washing Expert System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .car-part:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-base md:text-lg leading-relaxed">
+  <div class="container mx-auto px-4 py-8">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-blue-800 mb-2">Car Washing Expert</h1>
+      <p class="text-lg text-gray-600">Professional guidance for perfect car washing every time</p>
+    </header>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="p-8">
+        <div class="mb-8">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-4">Enter Your Car Details</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-gray-700 mb-2" for="car-make">Car Make</label>
+              <input type="text" id="car-make" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 mb-2" for="car-model">Car Model</label>
+              <input type="text" id="car-model" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 mb-2" for="car-year">Year</label>
+              <input type="number" id="car-year" min="1900" max="2025" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-gray-700 mb-2" for="car-type">Vehicle Type</label>
+              <select id="car-type" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="sedan">Sedan</option>
+                <option value="suv">SUV</option>
+                <option value="truck">Truck</option>
+                <option value="luxury">Luxury Vehicle</option>
+                <option value="electric">Electric Vehicle</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-4 mt-6">
+            <button id="generate-btn" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-300">Generate Instructions</button>
+            <button onclick="resetForm()" class="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600">Reset</button>
+            <button onclick="saveCarProfile()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">Save Profile</button>
+            <button onclick="loadCarProfile()" class="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">Load Profile</button>
+          </div>
+        </div>
+
+        <div id="loading-spinner" class="hidden text-center mt-4">
+          <i class="fas fa-spinner fa-spin text-blue-600 text-3xl"></i>
+          <p class="text-gray-600 mt-2">Generating instructions...</p>
+        </div>
+
+        <section id="instructions" class="hidden fade-in transition-all duration-500 ease-in-out">
+          <h2 class="text-2xl font-semibold text-gray-800 mb-6 mt-8">Your Custom Washing Guide</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Sections: Water, Soap, Pressure, Tools -->
+            <div class="bg-blue-50 p-6 rounded-lg">
+              <div class="flex items-center mb-4"><i class="fas fa-tint text-blue-600 text-2xl mr-3"></i><h3 class="text-xl font-semibold text-blue-800">Water Quality</h3></div>
+              <p id="water-quality" class="text-gray-700"></p>
+            </div>
+
+            <div class="bg-green-50 p-6 rounded-lg">
+              <div class="flex items-center mb-4"><i class="fas fa-soap text-green-600 text-2xl mr-3"></i><h3 class="text-xl font-semibold text-green-800">Soap & Wax</h3></div>
+              <p id="soap-wax" class="text-gray-700"></p>
+            </div>
+
+            <div class="bg-yellow-50 p-6 rounded-lg">
+              <div class="flex items-center mb-4"><i class="fas fa-tachometer-alt text-yellow-600 text-2xl mr-3"></i><h3 class="text-xl font-semibold text-yellow-800">Water Pressure</h3></div>
+              <p id="water-pressure" class="text-gray-700"></p>
+            </div>
+
+            <div class="bg-purple-50 p-6 rounded-lg">
+              <div class="flex items-center mb-4"><i class="fas fa-tools text-purple-600 text-2xl mr-3"></i><h3 class="text-xl font-semibold text-purple-800">Tools & Brushes</h3></div>
+              <p id="tools-brushes" class="text-gray-700"></p>
+            </div>
+          </div>
+
+          <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center"><i class="fas fa-car-side text-gray-600 text-2xl mr-3"></i>Special Area Handling</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div class="car-part bg-white p-4 rounded-lg border"><h4 class="font-medium text-gray-800 mb-2">Windows & Mirrors</h4><p id="windows" class="text-sm text-gray-600"></p></div>
+              <div class="car-part bg-white p-4 rounded-lg border"><h4 class="font-medium text-gray-800 mb-2">Wheels & Tires</h4><p id="wheels" class="text-sm text-gray-600"></p></div>
+              <div class="car-part bg-white p-4 rounded-lg border"><h4 class="font-medium text-gray-800 mb-2">Paint & Body</h4><p id="paint" class="text-sm text-gray-600"></p></div>
+              <div class="car-part bg-white p-4 rounded-lg border"><h4 class="font-medium text-gray-800 mb-2">Interior</h4><p id="interior" class="text-sm text-gray-600"></p></div>
+              <div class="car-part bg-white p-4 rounded-lg border"><h4 class="font-medium text-gray-800 mb-2">Grille & Bumpers</h4><p id="grille" class="text-sm text-gray-600"></p></div>
+              <div class="car-part bg-white p-4 rounded-lg border"><h4 class="font-medium text-gray-800 mb-2">Undercarriage</h4><p id="undercarriage" class="text-sm text-gray-600"></p></div>
+            </div>
+          </div>
+
+          <div class="mt-8 bg-red-50 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold text-red-800 mb-4 flex items-center"><i class="fas fa-exclamation-triangle text-red-600 text-2xl mr-3"></i>Warnings & Prohibited Actions</h3>
+            <div id="warnings" class="text-gray-700"></div>
+          </div>
+
+          <div class="text-right mt-8">
+            <button onclick="window.print()" class="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900">
+              Print / Save as PDF
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const generateBtn = document.getElementById('generate-btn');
+    generateBtn.addEventListener('click', () => {
+      const make = document.getElementById('car-make').value.trim();
+      const model = document.getElementById('car-model').value.trim();
+      const year = document.getElementById('car-year').value;
+      const type = document.getElementById('car-type').value;
+
+      if (!make || !model || !year) {
+        alert('Please fill in all car details');
+        return;
+      }
+
+      document.getElementById('loading-spinner').classList.remove('hidden');
+
+      setTimeout(() => {
+        generateInstructions(make, model, year, type);
+        document.getElementById('instructions').classList.remove('hidden');
+        document.getElementById('loading-spinner').classList.add('hidden');
+        document.getElementById('instructions').scrollIntoView({ behavior: 'smooth' });
+      }, 700);
+    });
+
+    function saveCarProfile() {
+      const profile = {
+        make: document.getElementById('car-make').value,
+        model: document.getElementById('car-model').value,
+        year: document.getElementById('car-year').value,
+        type: document.getElementById('car-type').value
+      };
+      localStorage.setItem('carProfile', JSON.stringify(profile));
+      alert('Profile saved!');
+    }
+
+    function loadCarProfile() {
+      const profile = JSON.parse(localStorage.getItem('carProfile'));
+      if (profile) {
+        document.getElementById('car-make').value = profile.make;
+        document.getElementById('car-model').value = profile.model;
+        document.getElementById('car-year').value = profile.year;
+        document.getElementById('car-type').value = profile.type;
+        alert('Profile loaded!');
+      } else {
+        alert('No saved profile found.');
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('car-make').value = '';
+      document.getElementById('car-model').value = '';
+      document.getElementById('car-year').value = '';
+      document.getElementById('car-type').value = 'sedan';
+      document.getElementById('instructions').classList.add('hidden');
+    }
+
+    function generateInstructions(make, model, year, type) {
+      const waterQuality = {
+        standard: "Use filtered or deionized water...",
+        luxury: "Always use deionized or distilled water...",
+        electric: "Use filtered water with low mineral content...",
+        default: "Clean tap water is acceptable..."
+      };
+      const soapWax = {
+        standard: "Use pH-balanced car wash soap...",
+        luxury: "Use premium pH-neutral wash solutions...",
+        electric: "Use non-conductive, pH-neutral cleaners...",
+        default: "Use a dedicated car wash soap..."
+      };
+      const waterPressure = {
+        sedan: "Medium pressure (1000-1200 PSI)...",
+        suv: "Medium-high pressure (1200-1500 PSI)...",
+        truck: "High pressure (1500-1800 PSI)...",
+        luxury: "Low-medium pressure (800-1000 PSI)...",
+        electric: "Medium pressure (1000-1200 PSI)...",
+        default: "Medium pressure (1000-1200 PSI)..."
+      };
+      const toolsBrushes = {
+        standard: "Use microfiber wash mitts...",
+        luxury: "Premium microfiber mitts only...",
+        electric: "Non-abrasive microfiber tools...",
+        default: "Microfiber wash mitt and drying towel..."
+      };
+      const windowsText = "Clean with glass cleaner...";
+      const wheelsText = type === 'luxury' ? "Use pH-balanced wheel cleaner..." : "Apply wheel cleaner and rinse thoroughly.";
+      const paintText = type === 'luxury' ? "Wash in straight lines..." : "Wash from top down...";
+      const interiorText = type === 'luxury' ? "Use premium leather/vinyl cleaners..." : "Vacuum then clean each surface...";
+      const grilleText = "Use soft brush for intricate grille...";
+      const undercarriageText = type === 'truck' ? "Spray undercarriage with moderate pressure..." : "Occasional undercarriage rinse recommended.";
+      const warnings = {
+        standard: "<ul><li>Never mix acidic and alkaline cleaners</li><li>Don't wash in sunlight</li></ul>",
+        luxury: "<ul><li>Avoid automatic car washes</li><li>No abrasive compounds</li></ul>",
+        electric: "<ul><li>Never pressure wash charging ports</li><li>Avoid conductive tools</li></ul>",
+        default: "<ul><li>Don't wash a hot car</li><li>Don't use dish soap</li></ul>"
+      };
+
+      document.getElementById('water-quality').textContent = waterQuality[type] || waterQuality.default;
+      document.getElementById('soap-wax').textContent = soapWax[type] || soapWax.default;
+      document.getElementById('water-pressure').textContent = waterPressure[type] || waterPressure.default;
+      document.getElementById('tools-brushes').textContent = toolsBrushes[type] || toolsBrushes.default;
+      document.getElementById('windows').textContent = windowsText;
+      document.getElementById('wheels').textContent = wheelsText;
+      document.getElementById('paint').textContent = paintText;
+      document.getElementById('interior').textContent = interiorText;
+      document.getElementById('grille').textContent = grilleText;
+      document.getElementById('undercarriage').textContent = undercarriageText;
+      document.getElementById('warnings').innerHTML = warnings[type] || warnings.default;
+    }
+  </script>
+</body>
+</html>
